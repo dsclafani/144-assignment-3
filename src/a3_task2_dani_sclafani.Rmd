@@ -1,0 +1,34 @@
+---
+title: "a3_task2_dani_sclafani"
+author: "Danielle Sclafani"
+date: "2/17/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(raster) 
+library(tidyverse)
+library(here)
+library(sf)
+library(fasterize)
+```
+
+```{r}
+#loading in the data
+
+bala_acu_data <- here("ca_cetaceans", "Balaenoptera_acutorostrata")
+
+total_cetaceans <-list.files(path = here("ca_cetaceans"), full.names = TRUE)
+
+ceta_stack <- raster::stack(total_cetaceans)
+
+ceta_stack
+
+plot(ceta_stack)
+  
+```
+
+
+
+
