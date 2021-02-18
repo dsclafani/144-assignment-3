@@ -11,8 +11,12 @@ library(raster)
 library(tidyverse)
 library(here)
 library(sf)
+library(janitor)
 library(fasterize)
 ```
+
+showing the probability of occurrence (based on relative environmental suitability, including species preferences for water temperature, depth, salinity, and distance to land) of 35 cetacean species that can be found in the California Bight.  The extent of the rasters is 125° W to 115°W (which R considers -125 to -115) and 32°N to 38°N.  
+
 
 ```{r}
 #loading in the data
@@ -23,10 +27,59 @@ total_cetaceans <-list.files(path = here("ca_cetaceans"), full.names = TRUE)
 
 ceta_stack <- raster::stack(total_cetaceans)
 
-ceta_stack
+ceta_stack_df <- raster::rasterToPoints(ceta_stack) %>% 
+  as.data.frame() 
 
-plot(ceta_stack)
+ceta_df <- ceta_stack_df %>% 
+  mutate_all(~replace(., is.na(.),0)) %>% 
+  mutate(
+    Balaenoptera_acutorostrata = case_when(Balaenoptera_acutorostrata > 0.6 ~ 1),
+    Balaenoptera_borealis = case_when(Balaenoptera_borealis > 0.6 ~ 1),
+    Balaenoptera_brydei = case_when(Balaenoptera_brydei >0.6 ~ 1),
+    Balaenoptera_edeni = case_when(Balaenoptera_edeni > 0.6 ~ 1),
+    Balaenoptera_musculus = case_when(Balaenoptera_musculus > 0.6 ~1),
+    Balaenoptera_physalus = case_when(Balaenoptera_physalus > 0.6 ~1),
+    Berardius_bairdii = case_when(Berardius_bairdii > 0.6 ~1),
+    Delphinus_capensis = case_when(Delphinus_capensis > 0.6 ~1),
+    Delphinus_delphis = case_when(Delphinus_delphis > 0.6 ~1),
+    Eschrichtius_robustus = case_when( Eschrichtius_robustus > 0.6 ~1),
+    Eubalaena_japonica = case_when(Eubalaena_japonica> 0.6 ~1),
+    Globicephala_macrorhynchus = case_when(Globicephala_macrorhynchus > 0.6 ~1),
+    Grampus_griseus = case_when(Grampus_griseus > 0.6 ~1),
+    Indopacetus_pacificus = case_when(Indopacetus_pacificus > 0.6 ~1),
+    Kogia_breviceps = case_when(Kogia_breviceps > 0.6 ~1),
+    Kogia_sima = case_when(Kogia_sima > 0.6 ~ 1),
+    Lagenodelphis_hosei = case_when(Lagenodelphis_hosei > 0.6 ~1),
+    Lagenorhynchus_obliquidens = case_when(Lagenorhynchus_obliquidens > 0.6~ 1),
+    Lissodelphis_borealis = case_when(Lissodelphis_borealis > 0.6 ~1),
+    Megaptera_novaeangliae = case_when(Megaptera_novaeangliae > 0.6 ~1),
+    Mesoplodon_carlhubbsi = case_when(Mesoplodon_carlhubbsi > 0.6 ~1),
+    Mesoplodon_densirostris = case_when(Mesoplodon_densirostris > 0.6 ~1),
+    Mesoplodon_ginkgodens = case_when(Mesoplodon_ginkgodens > 0.6 ~ 1),
+    Mesoplodon_perrini = case_when(Mesoplodon_perrini > 0.6 ~1),
+    Mesoplodon_stejnegeri = case_when(Mesoplodon_stejnegeri > 0.6 ~ 1),
+    Orcinus_orca = case_when(Orcinus_orca > 0.6 ~1),
+    Phocoena_phocoena = case_when(Phocoena_phocoena > 0.6 ~1),
+    Phocoenoides_dalli = case_when(Phocoenoides_dalli > 0.6 ~1),
+    Physeter_macrocephalus = case_when(Physeter_macrocephalus > 0.6 ~1),
+    Pseudorca_crassidens = case_when(Pseudorca_crassidens > 0.6 ~1),
+    Stenella_attenuata = case_when(Stenella_attenuata > 0.6 ~1),
+    Stenella_coeruleoalba = case_when(Stenella_coeruleoalba > 0.6 ~1),
+    Steno_bredanensis = case_when(Steno_bredanensis > 0.6 ~1),
+    Tursiops_truncatus = case_when(Tursiops_truncatus > 0.6 ~ 1),
+    Ziphius_cavirostris = case_when(Ziphius_cavirostris > 0.6 ~1)
+  )%>% 
+  mutate_all(~replace(., is.na(.),0)) %>% 
+  clean_names()
   
+ceta_df$total_prob <- rowSums(ceta_df[,3:37], na.rm = TRUE)
+
+xyz_ceta_df <- ceta_df %>% 
+  rasterFromXYZ(x, y, total_prob)
+
+
+
+
 ```
 
 
