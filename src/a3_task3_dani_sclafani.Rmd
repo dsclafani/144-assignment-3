@@ -26,7 +26,7 @@ twilight <- pdf_text(here("1-stephenie-meyer-twilight.pdf"))
 
 ```
 
-```{r}
+```{r, message=FALSE, warning = FALSE}
 # initial data wrangling
 twl_tidy <- data.frame(twilight) %>% 
   mutate(text_full = str_split(twilight, pattern = "\\n")) %>% 
@@ -156,7 +156,7 @@ ggplot(data = no_name_top5, aes(x = word, y = n)) +
 
 ### Visualization of Word Count when Twilight is broken into Beginning, Middle, and End parts
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 #breaking the book into parts-  beginning, middle and end
 
 be_mid_end  <- no_names %>% 
@@ -187,7 +187,7 @@ ggplot(data = part_top10, aes(x = word, y = n)) +geom_col(fill = "cyan4") +
   facet_wrap(~part_reorder)+
   coord_flip()+
   theme_minimal()+
-  labs( x = " ", y ="Count", title = "Ten Most Frequent words in Beggining, Middle, and Ending\n of Twilight by Stephenie Meyers")+
+  labs( x = " ", y ="Count", title = "Ten Most Frequent words in Beggining, Middle, \n and Ending of Twilight")+
   theme(plot.title = element_text(hjust =0.5))
 ```
 
@@ -196,7 +196,7 @@ ggplot(data = part_top10, aes(x = word, y = n)) +geom_col(fill = "cyan4") +
 ## Sentiments
 
 ### Using Afinn Lexicon
-```{r}
+```{r, warning = FALSE, message=FALSE}
 twl_affin <- no_names %>% 
   inner_join(get_sentiments("afinn"))
 
@@ -224,7 +224,7 @@ mean_afinn_graph <- ggplot(data = mean_afinn,
 
 
 ```
-```{r, fig.cap="Figure 2.0: The average sentiment score of each Chapter of Twilight based on Afinn sentiment package."}
+```{r, message= FALSE, warning = FALSE, fig.cap="Figure 2.0: The average sentiment score of each Chapter of Twilight based on Afinn sentiment package."}
 mean_afinn_graph
 ```
 The majority of chapters have a negative average sentiment score. However, as sentiments are ranked on a -5 to 5 scale, the overall tone of the book is not that negative. The spike of positive sentiment scores occurs around chapters 14, 15, and 16 which is the beginning of Edward and Bella's love story.
@@ -248,7 +248,7 @@ top_nrc$part_reorder = factor(top_nrc$part, levels = c("Beginning", "Middle", "E
 ```
 
 
-```{r, fig.cap = "Figure 3.0: Average Sentiments for each part of the book based on NRC sentiments. Individual words are categorized into sentiments The top ten sentiments for each part of the book are displayed above"}
+```{r, warning= FALSE, message=FALSE, fig.cap = "Figure 3.0: Average Sentiments for each part of the book based on NRC sentiments. Individual words are categorized into sentiments The top ten sentiments for each part of the book are displayed above"}
 ggplot(data = top_nrc, aes(x = sentiment, y =n)) +geom_col(fill = "lightblue") +
   facet_wrap(~part_reorder)+
   coord_flip() +
