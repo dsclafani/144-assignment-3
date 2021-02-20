@@ -1,0 +1,29 @@
+---
+title: "a3_task3_dani_sclafani"
+author: "Danielle Sclafani"
+date: "2/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidytext)
+library(textdata)
+library(pdftools)
+library(ggwordcloud)
+library(here)
+```
+
+
+```{r, cache= TRUE}
+
+twilight <- pdf_text(here("Twilight.pdf"))
+
+```
+
+
+```{r}
+twl_tidy <- data.frame(twilight)
+```
+
