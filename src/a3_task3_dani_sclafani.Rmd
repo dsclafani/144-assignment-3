@@ -18,12 +18,154 @@ library(here)
 
 ```{r, cache= TRUE}
 
-twilight <- pdf_text(here("Twilight.pdf"))
+twilight <- pdf_text(here("1-stephenie-meyer-twilight.pdf"))
 
 ```
 
 
 ```{r}
-twl_tidy <- data.frame(twilight)
+twl_tidy <- data.frame(twilight) %>% 
+  mutate(text_full = str_split(twilight, pattern = "\\n")) %>% 
+  unnest(text_full) %>% 
+  mutate(text_full = str_trim(text_full))
 ```
+
+
+```{r}
+# cutting out the preface and the information. want to start at chapter 1
+
+twl_df <- twl_tidy %>% 
+  slice(-(1:79)) %>% 
+  mutate(chapter = case_when(
+    str_detect(text_full, pattern = "1. FIRST") ~ text_full,
+    str_detect(text_full, pattern = "2. OPEN")  ~ text_full,
+    str_detect(text_full, pattern = "3. PHENOM")  ~ text_full,
+    str_detect(text_full, pattern = "4. INVITATIONS")  ~ text_full,
+    str_detect(text_full, pattern = "5. BLOOD")   ~ text_full,
+    str_detect(text_full, pattern = "6. SCARY")  ~ text_full,
+    str_detect(text_full, pattern = "7. NIGHTMARE")   ~ text_full,
+    str_detect(text_full, pattern = "8. PORT")   ~ text_full,
+    str_detect(text_full, pattern = "9. THEORY")  ~ text_full,
+    str_detect(text_full, pattern = "10. INTERROGATION")  ~ text_full,
+    str_detect(text_full, pattern = "11. COMPLICATION")  ~ text_full,
+    str_detect(text_full, pattern = "12. BALANCING")  ~ text_full,
+    str_detect(text_full, pattern = "13. CONFESSIONS")  ~ text_full,
+    str_detect(text_full, pattern = "14. MIND")   ~ text_full,
+    str_detect(text_full, pattern = "15. THE")  ~ text_full,
+    str_detect(text_full, pattern = "16. CARLISLE") ~ text_full,
+    str_detect(text_full, pattern = "17. THE")  ~ text_full,
+    str_detect(text_full, pattern = "18. THE")  ~ text_full,
+    str_detect(text_full, pattern = "19. GOODBYES")  ~ text_full,
+    str_detect(text_full, pattern = "20. IMPAT")  ~ text_full,
+    str_detect(text_full, pattern = "21. PHONE")  ~ text_full,
+    str_detect(text_full, pattern = "22. HIDE")  ~ text_full,
+    str_detect(text_full, pattern = "23. THE")  ~ text_full,
+    str_detect(text_full, pattern = "24. AN") 
+               ~ text_full)
+    
+  ) %>% 
+  fill(chapter) %>% 
+  separate(col = chapter, into = c("no", "title"), sep = " ") %>% 
+  separate(col = no, into = c("no", "delete", sep = ".")) %>% 
+  select(text_full, no, title) %>% 
+  mutate(chapter = as.numeric(no))
+
+
+```
+
+
+```{r}
+#getting word counts by chaoter
+twl_tokens <- twl_df %>% 
+  unnest_tokens(word, text_full) %>% 
+  select(chapter, word)
+
+#twlight wordcount
+twl_count <- twl_tokens %>% 
+  count(chapter, word)
+
+#removing stop words
+twl_no_stop <- twl_tokens %>% 
+  anti_join(stop_words)
+
+
+#counting without stop words
+nostop_counts <- twl_no_stop %>% 
+  count(chapter, word)
+
+# finding top 5 words in each chapter
+
+top_10 <- nostop_counts %>% 
+  group_by(chapter) %>% 
+  arrange(-n) %>% 
+  slice(1:10)
+
+top_5 <- nostop_counts %>% 
+  group_by(chapter) %>% 
+  arrange(-n) %>% 
+  slice(1:5)
+```
+
+
+
+```{r}
+# lets look at this data
+
+ggplot(data = top_5, aes(x = word, y = n)) +
+  geom_col(fill = "purple")+
+  facet_wrap(~chapter, scales = "free")+
+  coord_flip()
+```
+
+```{r}
+# many of the top 5 words are names, so going to remove names by creating a vector of the main characters names in order to get more accurate sentiments, villians names are ommitted from this list because important
+
+names_vector <- c("bella", "edward", "carlisle", "alice", "jasper", "jacob", "charlie", "mike", "jessica", "cullen", "emmett", "esme", "angela")
+
+name_df <- as.data.frame(names_vector) %>% 
+  rename(word = names_vector)
+
+no_names <- twl_no_stop %>% 
+  anti_join(name_df)
+
+```
+
+```{r}
+#making a visualization without names
+
+counts_no_name <- no_names %>% 
+  count(chapter, word)
+
+no_name_top5 <- counts_no_name %>% 
+  group_by(chapter) %>% 
+  arrange(-n) %>% 
+  slice(1:5)
+
+ggplot(data = no_name_top5, aes(x = word, y = n)) +
+  geom_col(fill = "purple")+
+  facet_wrap(~chapter, scales = "free")+
+  coord_flip()
+
+```
+
+
+```{r}
+#making a wordcloud
+ch1_top100 <- nostop_counts %>% 
+  filter(chapter == 1) %>% 
+  arrange(-1) %>% 
+  slice(1:100)
+
+ggplot(data = ch1_top100, aes(label = word))+
+  geom_text_wordcloud(aes(color = n, size = n), shape = "circle")+
+  scale_size_area(max_size = 6) +
+  scale_color_gradientn(colors = c("lightgrey", "pink", "red"))+
+  theme_minimal()
+
+ch1_cloud
+```
+
+
+
+
 
