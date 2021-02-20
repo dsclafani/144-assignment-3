@@ -71,11 +71,12 @@ twl_df <- twl_tidy %>%
   mutate(chapter = as.numeric(no))
 
 
+
 ```
 
 
 ```{r}
-#getting word counts by chaoter
+#getting word counts by chapter
 twl_tokens <- twl_df %>% 
   unnest_tokens(word, text_full) %>% 
   select(chapter, word)
@@ -120,7 +121,7 @@ ggplot(data = top_5, aes(x = word, y = n)) +
 ```{r}
 # many of the top 5 words are names, so going to remove names by creating a vector of the main characters names in order to get more accurate sentiments, villians names are ommitted from this list because important
 
-names_vector <- c("bella", "edward", "carlisle", "alice", "jasper", "jacob", "charlie", "mike", "jessica", "cullen", "emmett", "esme", "angela")
+names_vector <- c("bella", "edward", "carlisle", "alice", "jasper", "jacob", "charlie", "mike", "jessica", "cullen", "emmett", "esme", "angela", "billy")
 
 name_df <- as.data.frame(names_vector) %>% 
   rename(word = names_vector)
@@ -148,7 +149,35 @@ ggplot(data = no_name_top5, aes(x = word, y = n)) +
 
 ```
 
-### Making Wordclouds
+```{r}
+#breaking the book into beginning, middle and end
+
+be_mid_end  <- no_names %>% 
+  mutate(part = case_when(chapter %in% c(1, 2, 3, 4, 5, 6, 7, 8) ~ "Beginning",
+    chapter %in% c(9, 10, 11, 12, 13, 14, 15, 16) ~ "Middle",
+    chapter %in% c(17, 18, 19, 20, 21, 22, 23, 24) ~ "End"
+  ))
+
+counts_part <- be_mid_end %>% 
+  count(part, word)
+
+part_top10 <- counts_part %>% 
+  group_by(part) %>% 
+  arrange(-n) %>% 
+  slice(1:10)
+
+# visualizing word counts by part of the book
+
+part_top10$part_reorder = factor(part_top10$part, levels = c("Beginning", "Middle", "End")) # added this line into code to make sure that the graph showed up as beginning, middle, end - the default was beginning, end, middle
+
+ggplot(data = part_top10, aes(x = word, y = n)) +geom_col(fill = "cyan4") +
+  facet_wrap(~part_reorder)+
+  coord_flip()+
+  theme_minimal()
+```
+
+
+### Making Wordclouds 
 
 ```{r}
 ## WITH names
@@ -211,3 +240,41 @@ ch24_cloud_no_name
 ```
 
 ## Sentiments
+```{r}
+twl_affin <- no_names %>% 
+  inner_join(get_sentiments("afinn"))
+
+afinn_counts <- twl_affin %>% 
+  count(chapter, value)
+
+#distribution of afinn score of each chapter
+ggplot(data = afinn_counts, aes(x = value, y =n))+
+  geom_col()+
+  facet_wrap(~chapter)
+
+# mean afinn score of each chapter
+mean_afinn <- twl_affin %>% 
+  group_by(chapter) %>% 
+  summarize(mean_afinn = mean(value))
+
+#visualization of mean afinn score for each chapter
+ggplot(data = mean_afinn,
+       aes(x = fct_rev(as.factor(chapter)),
+           y = mean_afinn)) +
+  geom_col()+
+  coord_flip()
+```
+
+### using NRC Lexicon to get more details about chapter sentiments
+```{r}
+twl_nrc <- no_names %>% 
+  inner_join(get_sentiments("nrc"))
+
+twl_nrc_counts <- twl_nrc %>% 
+  count(chapter, sentiment)
+
+ggplot(data = twl_nrc_counts, aes(x = sentiment, y =n)) +geom_col() +
+  facet_wrap(~chapter)+
+  coord_flip()
+```
+
