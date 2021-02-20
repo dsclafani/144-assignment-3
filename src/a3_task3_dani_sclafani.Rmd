@@ -148,24 +148,66 @@ ggplot(data = no_name_top5, aes(x = word, y = n)) +
 
 ```
 
+### Making Wordclouds
 
 ```{r}
+## WITH names
 #making a wordcloud
 ch1_top100 <- nostop_counts %>% 
   filter(chapter == 1) %>% 
   arrange(-1) %>% 
   slice(1:100)
 
-ggplot(data = ch1_top100, aes(label = word))+
+ch1_cloud <- ggplot(data = ch1_top100, aes(label = word))+
   geom_text_wordcloud(aes(color = n, size = n), shape = "circle")+
   scale_size_area(max_size = 6) +
   scale_color_gradientn(colors = c("lightgrey", "pink", "red"))+
   theme_minimal()
 
-ch1_cloud
+ch24_top100 <- nostop_counts %>% 
+  filter(chapter == 24) %>% 
+  arrange(-1) %>% 
+  slice(1:100)
+
+ch24_cloud <- ggplot(data = ch24_top100, aes(label = word))+
+  geom_text_wordcloud(aes(color = n, size = n), shape = "circle")+
+  scale_size_area(max_size = 6) +
+  scale_color_gradientn(colors = c("lightgrey", "pink", "red"))+
+  theme_minimal()
+
+ch24_cloud
+
 ```
 
 
 
+```{r}
+## WITHout names
+#making a wordcloud
+ch1_noname_top100 <- counts_no_name %>% 
+  filter(chapter == 1) %>% 
+  arrange(-1) %>% 
+  slice(1:100)
 
+ch1_cloud_no_name <- ggplot(data = ch1_noname_top100, aes(label = word))+
+  geom_text_wordcloud(aes(color = n, size = n), shape = "circle")+
+  scale_size_area(max_size = 6) +
+  scale_color_gradientn(colors = c("lightgrey", "pink", "red"))+
+  theme_minimal()
 
+ch24_noname_top100 <- counts_no_name %>% 
+  filter(chapter == 24) %>% 
+  arrange(-1) %>% 
+  slice(1:100)
+
+ch24_cloud_no_name <- ggplot(data = ch24_noname_top100 , aes(label = word))+
+  geom_text_wordcloud(aes(color = n, size = n), shape = "circle")+
+  scale_size_area(max_size = 6) +
+  scale_color_gradientn(colors = c("lightgrey", "pink", "red"))+
+  theme_minimal()
+
+ch24_cloud_no_name
+
+```
+
+## Sentiments
