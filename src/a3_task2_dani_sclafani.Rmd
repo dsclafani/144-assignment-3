@@ -13,6 +13,7 @@ library(here)
 library(sf)
 library(janitor)
 library(fasterize)
+library(rnaturalearth)
 ```
 
 showing the probability of occurrence (based on relative environmental suitability, including species preferences for water temperature, depth, salinity, and distance to land) of 35 cetacean species that can be found in the California Bight.  The extent of the rasters is 125° W to 115°W (which R considers -125 to -115) and 32°N to 38°N.  
@@ -21,9 +22,8 @@ showing the probability of occurrence (based on relative environmental suitabili
 ```{r}
 #loading in the data
 
-bala_acu_data <- here("ca_cetaceans", "Balaenoptera_acutorostrata")
-
 total_cetaceans <-list.files(path = here("ca_cetaceans"), full.names = TRUE)
+
 
 ceta_stack <- raster::stack(total_cetaceans)
 
@@ -75,11 +75,25 @@ ceta_df <- ceta_stack_df %>%
 ceta_df$total_prob <- rowSums(ceta_df[,3:37], na.rm = TRUE)
 
 xyz_ceta_df <- ceta_df %>% 
-  rasterFromXYZ(x, y, total_prob)
+  select(x, y, total_prob)
+
+ggplot(data = xyz_ceta_df, aes(x =x, y=y, fill = total_prob)) + geom_raster()+
+  geom_raster()
+
+```
 
 
+# trying with something else, still need to establish a threshold
+```{r}
+test_total <-list.files(path = here("ca_cetaceans"), full.names = TRUE)
+ 
+stack_test <- raster::stack(test_total)
+
+raster_total<- raster(stack_test)
 
 
+plot(raster_total,
+     main = "Species Probability")
 ```
 
 
