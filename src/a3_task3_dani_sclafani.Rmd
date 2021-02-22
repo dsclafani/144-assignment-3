@@ -220,7 +220,8 @@ mean_afinn_graph <- ggplot(data = mean_afinn,
   geom_col(fill = "skyblue")+
   coord_flip()+
   theme_light()+
-  labs(x = "Chapter", y = "Mean Sentiment Score", title = "Average Afinn Sentiment score of each Chapter")
+  labs(x = "Chapter", y = "Mean Sentiment Score", title = "Average Afinn Sentiment score of each Chapter")+
+  theme(plot.title = element_text(hjust =0.5))
 
 
 ```

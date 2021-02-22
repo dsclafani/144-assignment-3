@@ -25,13 +25,14 @@ Data is provided by Oil Spill Incident Tracking [ds394]. (n.d.). Retrieved Febru
 #### Initial Data Wrangling
 
 ```{r,warning=FALSE, message=FALSE}
-# reading in the county data
+# reading in the county data from shapefile in order to make a map
 ca_counties <- read_sf(here("ca_counties"), layer = "CA_Counties_TIGER2016") %>% 
   clean_names() %>% 
   select(name)
 
-# st_crs(ca_counties)
+# st_crs(ca_counties) , checked the coordinate system, commented it out for sake of cleanness
 
+#reading in the oil spill data
 oil_data <- read_sf(here("oil_data"), layer = "Oil_Spill_Incident_Tracking_%5Bds394%5D") %>% 
   clean_names()
 
