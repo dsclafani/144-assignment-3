@@ -15,6 +15,8 @@ library(janitor)
 library(fasterize)
 library(rnaturalearth)
 library(sp)
+library(rnaturalearthdata)
+library(rgeos)
 ```
 
 showing the probability of occurrence (based on relative environmental suitability, including species preferences for water temperature, depth, salinity, and distance to land) of 35 cetacean species that can be found in the California Bight.  The extent of the rasters is 125° W to 115°W (which R considers -125 to -115) and 32°N to 38°N.  
@@ -92,7 +94,6 @@ plot(stack_test)
 ```
 
 
-
 ```{r}
 #establishing the threshold
 
@@ -109,48 +110,77 @@ plot(species)
 
 
 
-
-
-
 ```{r}
 #converting data frame for ggplot
 species_df <-raster::rasterToPoints(species) %>% 
   as.data.frame() %>% 
   mutate_all(~replace(., is.na(.), 0))
 
-stack_raster_df <-raster::rasterToPoints(stack_test) %>% 
+species_df$total_prob <- rowSums(species_df[,3:37], na.rm = TRUE)
+
+
+#did not need a stack_raster_df
+#stack_raster_df <-raster::rasterToPoints(stack_test) %>% 
   as.data.frame() 
 
-
-
-ggplot(data = stack_raster_df, aes(x=x, y=y)) + geom_raster()+
-  geom_raster(data = species_df, fill = 'blue') +
-  coord_sf(expand = 0)+
-  scale_fill_gradient(low = 'lightblue', high= 'navy')+
-  theme_void()+
-  theme(panel.background = element_rect(fill = 'slateblue4'))
+#ggplot(data = stack_raster_df, aes(x=x, y=y)) + geom_raster()+
+#  geom_raster(data = species_df, fill = 'blue') +
+#  coord_sf(expand = 0)+
+ # scale_fill_gradient(low = 'lightblue', high= 'navy')+
+# theme_void()+
+ # theme(panel.background = element_rect(fill = 'slateblue4'))
 
 ```
 
-#using casewhen data
-```{r}
 
-ggplot(data = stack_raster_df, aes(x=x, y=y)) + geom_raster()+
-  geom_raster(data = xyz_ceta_df, aes(fill = total_prob)) +
-  coord_sf(expand = 0)+
-  scale_fill_gradient(low = 'lightblue', high= 'blue')+
+## loading in the map form rnatural earth
+```{r}
+#loading in the map from rnatural earth
+map <- ne_countries(scale = "medium", returnclass = "sf")
+
+ggplot(data = map) +
+  geom_sf() +
+  coord_sf(xlim = c(-125, -115), ylim = c(32,38), expand = FALSE)
+```
+
+## graphing the map and the raster together
+```{r}
+ggplot()+ 
+  geom_raster(data = species_df, aes( x=x, y =y, fill = total_prob))+
+  scale_fill_gradient(low = 'yellow', high= 'red')+
   theme_void()+
-  theme(panel.background = element_rect(fill = "black"))
+  geom_sf(data = map, fill = "lightgreen")+
+  coord_sf(xlim = c(-125, -115), ylim = c(32,38), expand = FALSE)
+
+
 ```
 
 
+
 ```{r}
+
+# trying to make res smaller, think we can't since beginning res was already so big.
+res(species) #res = 0.5, 0.5
+
+species_new_res <- aggregate(species, fact = 0./res(species))
+```
+
+
+### trying to make map earth topographic
+
+```{r}
+map_1 <- ne_download(scale = 110, category = "physical", type = 'land')
+
+
+ggplot()+ 
+  geom_raster(data = species_df, aes( x=x, y =y, fill = total_prob))+
+  scale_fill_gradient(low = 'yellow', high= 'red')+
+  theme_void()+
+  geom_sf(data = coastline110)+
+  coord_sf(xlim = c(-125, -115), ylim = c(32,38), expand = FALSE)
+
 coastline110 <- ne_download(scale = 110, type = 'land', category = 'physical', returnclass = "sf")
 ```
 
 
-```{r}
-ggplot()
-  geom_sf(data = coastline110, aes(layer = "new_110m_land"))
-```
 

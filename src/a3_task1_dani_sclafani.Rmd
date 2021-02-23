@@ -66,7 +66,7 @@ tm_shape(oil_data)+
 
 ```{r, warning = FALSE, message = FALSE}
 #need to find count of oil spills in each CA county. 
-# Step 1- join te data sets (since we already set the coordinate systems to match)
+# Step 1- join the data sets (since we already set the coordinate systems to match)
 
 oil_county <- ca_counties %>% 
   st_join(oil_data)
