@@ -17,12 +17,14 @@ library(rnaturalearth)
 library(sp)
 library(rnaturalearthdata)
 library(rgeos)
+
 ```
 
-showing the probability of occurrence (based on relative environmental suitability, including species preferences for water temperature, depth, salinity, and distance to land) of 35 cetacean species that can be found in the California Bight.  The extent of the rasters is 125° W to 115°W (which R considers -125 to -115) and 32°N to 38°N.  
+## Background
+Showing the species richness of certain areas based on the probability of occurrence (probability is calculated based on relative environmental suitability, including species preferences for water temperature, depth, salinity, and distance to land) of 35 cetacean species that can be found in the California Bight.  The extent of the rasters is 125° W to 115°W (which R considers -125 to -115) and 32°N to 38°N.  
 
-
-```{r}
+### Data Wrangling Part 1
+```{r, message = FALSE, warning = FALSE}
 #loading in the data
 
 total_cetaceans <-list.files(path = here("ca_cetaceans"), full.names = TRUE)
@@ -84,8 +86,9 @@ ggplot(data = xyz_ceta_df, aes(x =x, y=y, fill = total_prob)) + geom_raster()
 ```
 
 
-# trying with something else, still need to establish a threshold
+### Data Wrangling Part 2 - proved more successful
 ```{r}
+# trying with something else, still need to establish a threshold
 test_total <-list.files(path = here("ca_cetaceans"), full.names = TRUE)
  
 stack_test <- raster::stack(test_total)
@@ -93,7 +96,7 @@ stack_test <- raster::stack(test_total)
 plot(stack_test)
 ```
 
-
+### Creating the threshold
 ```{r}
 #establishing the threshold
 
@@ -109,19 +112,19 @@ plot(species)
 
 
 
-
+### Converting the raster data to a data frame for ggplot
 ```{r}
 #converting data frame for ggplot
 species_df <-raster::rasterToPoints(species) %>% 
   as.data.frame() %>% 
   mutate_all(~replace(., is.na(.), 0))
 
-species_df$total_prob <- rowSums(species_df[,3:37], na.rm = TRUE)
+species_df$total_prob <- rowSums(species_df[,3:37], na.rm = TRUE) #this summed all the probabilities that were above the threshold to get the total probability of species abundance 
 
 
 #did not need a stack_raster_df
 #stack_raster_df <-raster::rasterToPoints(stack_test) %>% 
-  as.data.frame() 
+  #as.data.frame() 
 
 #ggplot(data = stack_raster_df, aes(x=x, y=y)) + geom_raster()+
 #  geom_raster(data = species_df, fill = 'blue') +
@@ -133,7 +136,7 @@ species_df$total_prob <- rowSums(species_df[,3:37], na.rm = TRUE)
 ```
 
 
-## loading in the map form rnatural earth
+### Loading in the Map form `rnaturalearth` Package
 ```{r}
 #loading in the map from rnatural earth
 map <- ne_countries(scale = "medium", returnclass = "sf")
@@ -143,44 +146,17 @@ ggplot(data = map) +
   coord_sf(xlim = c(-125, -115), ylim = c(32,38), expand = FALSE)
 ```
 
-## graphing the map and the raster together
+### Graphing the Map and the Raster Together
 ```{r}
+
 ggplot()+ 
   geom_raster(data = species_df, aes( x=x, y =y, fill = total_prob))+
   scale_fill_gradient(low = 'yellow', high= 'red')+
   theme_void()+
   geom_sf(data = map, fill = "lightgreen")+
-  coord_sf(xlim = c(-125, -115), ylim = c(32,38), expand = FALSE)
+  coord_sf(xlim = c(-125, -115), ylim = c(32,38), expand = FALSE) #set coordinates to the same as the raster so they match up
 
 
 ```
-
-
-
-```{r}
-
-# trying to make res smaller, think we can't since beginning res was already so big.
-res(species) #res = 0.5, 0.5
-
-species_new_res <- aggregate(species, fact = 0./res(species))
-```
-
-
-### trying to make map earth topographic
-
-```{r}
-map_1 <- ne_download(scale = 110, category = "physical", type = 'land')
-
-
-ggplot()+ 
-  geom_raster(data = species_df, aes( x=x, y =y, fill = total_prob))+
-  scale_fill_gradient(low = 'yellow', high= 'red')+
-  theme_void()+
-  geom_sf(data = coastline110)+
-  coord_sf(xlim = c(-125, -115), ylim = c(32,38), expand = FALSE)
-
-coastline110 <- ne_download(scale = 110, type = 'land', category = 'physical', returnclass = "sf")
-```
-
 
 
