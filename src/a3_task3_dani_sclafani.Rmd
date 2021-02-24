@@ -181,7 +181,7 @@ part_top10$part_reorder = factor(part_top10$part, levels = c("Beginning", "Middl
 ```
 
 
-```{r, warning = FALSE, message = FALSE, fig.cap = "Figure 1.0: Chapters of Stephenie Meyer's Twilight are categorized into Beginning, Middle, and End parts by dividing the chapters evenly. The 10 most frequent words written in each part are displayed"}
+```{r, warning = FALSE, message = FALSE, fig.cap = "Figure 1.0: Chapters of Stephenie Meyer's Twilight are categorized into Beginning, Middle, and End parts by dividing the chapters evenly. The 10 most frequent words written in each part are displayed. *Names of characters were excluded from analysis to allow for accurate analysis of overall tone of text."}
 
 ggplot(data = part_top10, aes(x = word, y = n)) +geom_col(fill = "cyan4") +
   facet_wrap(~part_reorder)+
@@ -191,7 +191,7 @@ ggplot(data = part_top10, aes(x = word, y = n)) +geom_col(fill = "cyan4") +
   theme(plot.title = element_text(hjust =0.5))
 ```
 
-*Names of characters were excluded from analysis to allow for accurate analysis of overall tone of text.
+
 
 ## Sentiments
 
@@ -230,7 +230,7 @@ mean_afinn_graph
 ```
 The majority of chapters have a negative average sentiment score. However, as sentiments are ranked on a -5 to 5 scale, the overall tone of the book is not that negative. The spike of positive sentiment scores occurs around chapters 14, 15, and 16 which is the beginning of Edward and Bella's love story.
 
-### NRC Lexicon: More Details about each part sentiments
+### NRC Lexicon: More Details about each parts' sentiments
 ```{r, message = FALSE, warning = FALSE}
 #by part
 twl_nrc_part <- be_mid_end %>% 
