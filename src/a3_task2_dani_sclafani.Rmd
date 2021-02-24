@@ -83,13 +83,17 @@ ceta_df$total_prob <- rowSums(ceta_df[,3:37], na.rm = TRUE)
 xyz_ceta_df <- ceta_df %>% 
   select(x, y, total_prob)
 
+```
+
+```{r, warning = FALSE, message = FALSE, fig.cap= "Figure 1.0: Initial plot of cetaceans raster. Plotted with data wrangled iwth 'case_when()"}
+
 ggplot(data = xyz_ceta_df, aes(x =x, y=y, fill = total_prob)) + geom_raster()
 
 ```
 
 
 ### Data Wrangling Part 2 - proved more successful
-```{r, warning = FALSE, message=FALSE}
+```{r, warning = FALSE, message=FALSE, fig.cap= "Figure 2.0: Initial plot of raster stack using class method"}
 # trying with something else, still need to establish a threshold
 test_total <-list.files(path = here("ca_cetaceans"), full.names = TRUE)
  
@@ -99,7 +103,7 @@ plot(stack_test)
 ```
 
 ### Creating the threshold
-```{r, message = FALSE, warning= FALSE}
+```{r, message = FALSE, warning= FALSE, fig.cap= "Figure 3:0 Raster plot with threshold established"}
 #establishing the threshold
 
 is_species <-function(x, thresh = 0.6) {
@@ -139,7 +143,7 @@ species_df$total_prob <- rowSums(species_df[,3:37], na.rm = TRUE) #this summed a
 
 
 ### Loading in the Map form `rnaturalearth` Package
-```{r}
+```{r, fig.cap= "Figure 4.0: 'rnaturalearth' map, Coordinates aligned to those of the raster"}
 #loading in the map from rnatural earth
 map <- ne_countries(scale = "medium", returnclass = "sf")
 
@@ -150,7 +154,7 @@ ggplot(data = map) +
 
 
 ### Graphing the Map and the Raster Together
-```{r}
+```{r, warning = FALSE, message= FALSE, fig.cap= "Figure 5.0: Raster data is mapped alongisde rnatural earth map"}
 
 ggplot()+ 
   geom_raster(data = species_df, aes( x=x, y =y, fill = total_prob))+
