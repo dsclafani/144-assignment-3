@@ -2,7 +2,9 @@
 title: "a3_task2_dani_sclafani"
 author: "Danielle Sclafani"
 date: "2/17/2021"
-output: html_document
+output: 
+  html_document:
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
@@ -21,7 +23,7 @@ library(rgeos)
 ```
 
 ## Background
-Showing the species richness of certain areas based on the probability of occurrence (probability is calculated based on relative environmental suitability, including species preferences for water temperature, depth, salinity, and distance to land) of 35 cetacean species that can be found in the California Bight.  The extent of the rasters is 125° W to 115°W (which R considers -125 to -115) and 32°N to 38°N.  
+The abundance of individual cetacean species along the California coast is approximated based on the relative environmental suitability, including species preferences for water temperature, depth, salinity, and distance to land. The probability of occurrence of 35 cetacean species are included in the AquaMaps dataset used in this report. The data is used to make a rasterized map, showing the probable species abundance based on a probability threshold of at least 0.6. The extent of the rasters is 125° W to 115°W (which R considers -125 to -115) and 32°N to 38°N.  
 
 ### Data Wrangling Part 1
 ```{r, message = FALSE, warning = FALSE}
@@ -87,7 +89,7 @@ ggplot(data = xyz_ceta_df, aes(x =x, y=y, fill = total_prob)) + geom_raster()
 
 
 ### Data Wrangling Part 2 - proved more successful
-```{r}
+```{r, warning = FALSE, message=FALSE}
 # trying with something else, still need to establish a threshold
 test_total <-list.files(path = here("ca_cetaceans"), full.names = TRUE)
  
@@ -97,7 +99,7 @@ plot(stack_test)
 ```
 
 ### Creating the threshold
-```{r}
+```{r, message = FALSE, warning= FALSE}
 #establishing the threshold
 
 is_species <-function(x, thresh = 0.6) {
@@ -107,7 +109,7 @@ is_species <-function(x, thresh = 0.6) {
 
 species <- calc(stack_test, fun = is_species)
 
-plot(species)
+plot(species) #plotting again to see how the threshold changed things
 ```
 
 
@@ -146,6 +148,7 @@ ggplot(data = map) +
   coord_sf(xlim = c(-125, -115), ylim = c(32,38), expand = FALSE)
 ```
 
+
 ### Graphing the Map and the Raster Together
 ```{r}
 
@@ -156,7 +159,8 @@ ggplot()+
   geom_sf(data = map, fill = "lightgreen")+
   coord_sf(xlim = c(-125, -115), ylim = c(32,38), expand = FALSE) #set coordinates to the same as the raster so they match up
 
-
 ```
 
 
+Data Citation:
+Kaschner, K., Rius-Barile, J., Kesner-Reyes, K., Garilao, C., Kullander, S., Rees, T., & Froese, R. (2016). AquaMaps: Predicted range maps for aquatic species. www.aquamaps.org
